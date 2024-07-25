@@ -1,0 +1,17 @@
+body {
+  padding: 16px;
+}
+header ul {
+  display: flex;
+  justify-content: space-around;
+}
+
+main {
+  min-height: 70vh;
+  display: flex;
+}
+
+main > div {
+  flex: 1;
+  border: 1px solid;
+}
