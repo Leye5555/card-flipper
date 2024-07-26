@@ -36,12 +36,45 @@ const cards = [
   },
   {
     name: "card8",
-    img: "./assets/img8",
+    img: "./assets/img8.jpg",
     number: 8,
   },
 ];
+
+//get game canvas
 const player1Canvas = document.getElementById("player1-canvas");
 const player2Canvas = document.getElementById("player2-canvas");
+
+// util variables
+const width = 100;
+const height = 100;
+
+// loop through cards data
+
+//1. for
+
+for (let i = 0; i < cards.length; i++) {
+  const item = cards[i];
+  // create card instance
+  const card = document.createElement("img");
+  card.setAttribute("src", item.img);
+  card.setAttribute("alt", item.name);
+  card.setAttribute("width", width);
+  card.setAttribute("height", height);
+  player1Canvas.appendChild(card);
+}
+
+for (let i = 0; i < cards.length; i++) {
+  const item = cards[i];
+  // create card instance
+  const card = document.createElement("img");
+  card.setAttribute("src", item.img);
+  card.setAttribute("alt", item.name);
+  card.setAttribute("width", width);
+  card.setAttribute("height", height);
+
+  player2Canvas.appendChild(card);
+}
 
 function init() {}
 
