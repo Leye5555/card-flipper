@@ -3,6 +3,7 @@ const cards = [
     name: "card1",
     img: "./assets/img1.jpg",
     id: 1,
+    "liveth-first": "100",
   },
   {
     name: "card2",
@@ -58,6 +59,8 @@ gameStart.addEventListener("click", function start() {
 //get game canvas
 const player1Canvas = document.getElementById("player1-canvas");
 const player2Canvas = document.getElementById("player2-canvas");
+const player1Score = document.getElementById("player1-score");
+const player2Score = document.getElementById("player2-score");
 
 // util variables
 const width = 100;
@@ -95,7 +98,7 @@ for (let i = formattedCards.length - 1; i >= 0; i--) {
 
 function randomize(array) {
   let temporaryArray = array.concat(array);
-  console.log({ temporaryArray });
+
   let finalArray = [];
 
   let prev = {};
@@ -137,6 +140,7 @@ function initializePlayers(player) {
     "player1",
     JSON.stringify({ score: 0, clickCount: 0 })
   );
+
   window.localStorage.setItem(
     "player2",
     JSON.stringify({ score: 0, clickCount: 0 })
@@ -144,11 +148,12 @@ function initializePlayers(player) {
 
   if (player === "1") {
     const imgs = document.querySelectorAll("#player1-canvas img");
-    console.log({ imgs });
     imgs.forEach(addEvent);
+    player1Score.textContent = 0;
   } else if (player === "2") {
     const imgs = document.querySelectorAll("#player2-canvas img");
     imgs.forEach(addEvent);
+    player2Score.textContent = 0;
   }
 }
 
@@ -166,36 +171,53 @@ function store(event) {
   if (dataset.player === player1) {
     let player1Stats = window.localStorage.getItem("player1");
     player1Stats = JSON.parse(player1Stats);
+    let player2Stats = window.localStorage.getItem("player2");
+    player2Stats = JSON.parse(player2Stats);
+
     if (Number(player1Stats.clickCount) < 2) {
       event.target.setAttribute("src", cards[event.target.dataset.id - 1].img);
       player1Stats.clickCount = Number(player1Stats.clickCount) + 1;
+      player1Stats.currentId = event.target.dataset.id;
       if (!player1Stats.prevId) {
         player1Stats.prevId = event.target.dataset.id;
       } else {
         const img1 = document.querySelector(
-          `[data-id='${player1Stats.prevId}']`
+          `#player1-canvas [data-id='${player1Stats.prevId}']`
         );
         const img2 = document.querySelector(
-          `[data-id='${event.target.dataset.id}']`
+          `#player1-canvas [data-id='${player1Stats.currentId}']`
         );
+
         if (player1Stats.prevId == event.target.dataset.id) {
           player1Stats.score = Number(player1Stats.score) + 1;
-          img1.removeEventListener("click", store);
-          img2.removeEventListener("click", store);
-          img1.style.css.visibility = "hidden";
-          img2.style.css.visibility = "hidden";
+          player1Score.textContent = player1Stats.score;
+          setTimeout(() => {
+            alert("Correct Choice");
+            img1.removeEventListener("click", store);
+            img1.style.visibility = "hidden";
+          }, 500);
+          setTimeout(() => {
+            img2.removeEventListener("click", store);
+            img2.style.visibility = "hidden";
+            console.log("test 11");
+          }, 1000);
         } else {
-          // setTimeout(() => {
-          //   alert("incorrect choice");
-          // }, 500);
           setTimeout(() => {
             img1.setAttribute("src", placeholderSrc);
+            alert("Incorrect choice");
+          }, 500);
+          setTimeout(() => {
+            console.log({ img2 });
             img2.setAttribute("src", placeholderSrc);
-          }, 3000);
+            console.log("test 11");
+          }, 1000);
         }
       }
-
+      player2Stats.prevId = "";
+      player2Stats.currentId = "";
+      player2Stats.clickCount = 0;
       window.localStorage.setItem("player1", JSON.stringify(player1Stats));
+      window.localStorage.setItem("player2", JSON.stringify(player2Stats));
     } else if (Number(player1Stats.clickCount) >= 2) {
       alert("It is player two's turn");
       player1Stats.clickCount = 0;
@@ -207,6 +229,61 @@ function store(event) {
   } else if (dataset.player === player2) {
     let player2Stats = window.localStorage.getItem("player2");
     player2Stats = JSON.parse(player2Stats);
+    let player1Stats = window.localStorage.getItem("player1");
+    player1Stats = JSON.parse(player1Stats);
+    if (Number(player2Stats.clickCount) < 2) {
+      event.target.setAttribute("src", cards[event.target.dataset.id - 1].img);
+      player2Stats.clickCount = Number(player2Stats.clickCount) + 1;
+      player2Stats.currentId = event.target.dataset.id;
+      if (!player2Stats.prevId) {
+        player2Stats.prevId = event.target.dataset.id;
+      } else {
+        const img1 = document.querySelector(
+          `#player2-canvas [data-id='${player2Stats.prevId}']`
+        );
+        const img2 = document.querySelector(
+          `#player2-canvas [data-id='${player2Stats.currentId}']`
+        );
+
+        if (player2Stats.prevId == event.target.dataset.id) {
+          player2Stats.score = Number(player2Stats.score) + 1;
+          player2Score.textContent = player2Stats.score;
+          setTimeout(() => {
+            alert("Correct Choice");
+            img1.removeEventListener("click", store);
+            img1.style.visibility = "hidden";
+          }, 500);
+          setTimeout(() => {
+            img2.removeEventListener("click", store);
+            img2.style.visibility = "hidden";
+            console.log("test 22");
+          }, 1000);
+        } else {
+          console.log("entered");
+          setTimeout(() => {
+            img1.setAttribute("src", placeholderSrc);
+            alert("Incorrect choice");
+          }, 500);
+          setTimeout(() => {
+            console.log({ img2 });
+
+            img2.setAttribute("src", placeholderSrc);
+            console.log("test 22");
+          }, 1000);
+        }
+      }
+      player1Stats.clickCount = 0;
+      player1Stats.prevId = "";
+      player1Stats.currentId = "";
+      window.localStorage.setItem("player1", JSON.stringify(player1Stats));
+      window.localStorage.setItem("player2", JSON.stringify(player2Stats));
+    } else if (Number(player2Stats.clickCount) >= 2) {
+      alert("It is player one's turn");
+      player2Stats.clickCount = 0;
+      player2Stats.prevId = 0;
+      return;
+    }
+
     console.log({ player2Stats });
   }
 }

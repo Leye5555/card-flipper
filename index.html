@@ -13,14 +13,15 @@
       <button id="start-game" type="button">Start Game</button>
       <header>
         <ul type="none">
-          <li>Player 1 Score : <span id="player1-score"></span></li>
-          <li>Player 2 Score : <span id="player2-score"></span></li>
+          <li>Player 1 Score : <span id="player1-score">0</span></li>
+          <li>Player 2 Score : <span id="player2-score">0</span></li>
         </ul>
       </header>
-      <main>
+      <main data-test="test-attr" class="test">
         <div id="player1-canvas"></div>
         <div id="player2-canvas"></div>
       </main>
+      <main></main>
     </div>
   </body>
 </html>
