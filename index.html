@@ -9,19 +9,27 @@
   </head>
   <body>
     <div class="app">
-      <h1>Card Flipper</h1>
-      <button id="start-game" type="button">Start Game</button>
       <header>
+        <h1>Card Flipper</h1>
+        <button id="start-game" type="button">Start Game</button>
         <ul type="none">
-          <li>Player 1 Score : <span id="player1-score">0</span></li>
-          <li>Player 2 Score : <span id="player2-score">0</span></li>
+          <li>Player one's score : <span id="player1-score">0</span></li>
+          <li>Player two's score : <span id="player2-score">0</span></li>
         </ul>
       </header>
       <main data-test="test-attr" class="test">
-        <div id="player1-canvas"></div>
-        <div id="player2-canvas"></div>
+        <div id="player1-canvas"><h2>Player One</h2></div>
+        <div id="player2-canvas" class="remove-canvas"><h2>Player Two</h2></div>
       </main>
-      <main></main>
     </div>
+    <div tabindex="0" id="sound-control">
+      <img
+        width="32"
+        height="32"
+        src="./assets/play-circle-svgrepo-com.svg"
+        alt="play sound"
+      />
+    </div>
+    <audio id="game-sound" src="./assets/game-sound.mp3" loop></audio>
   </body>
 </html>

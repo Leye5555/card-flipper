@@ -3,7 +3,6 @@ const cards = [
     name: "card1",
     img: "./assets/img1.jpg",
     id: 1,
-    "liveth-first": "100",
   },
   {
     name: "card2",
@@ -42,17 +41,35 @@ const cards = [
   },
 ];
 
-const formattedCards = randomize(cards);
+// define an array randomize method
+
+Array.prototype.randomize = function (arr) {
+  const tempArr = [...this];
+  const finalArr = [];
+  while (tempArr.length > 0) {
+    const randIndex = Math.floor(Math.random() * tempArr.length);
+    finalArr.push(tempArr[randIndex]);
+    tempArr.splice(randIndex, 1);
+  }
+  return finalArr;
+};
+
+const formattedCards = cards.concat(cards).randomize();
 
 const placeholderSrc = "./assets/placeholder.jpg";
 
 const gameStart = document.getElementById("start-game");
 
+const gameSound = document.getElementById("game-sound");
+
+const gameSoundControl = document.getElementById("sound-control");
+
+gameSoundControl.addEventListener("click", soundControl);
+
 const player1 = "1";
 const player2 = "2";
 
 gameStart.addEventListener("click", function start() {
-  console.log("game started");
   init();
 });
 
@@ -76,66 +93,27 @@ for (let i = 0; i < formattedCards.length; i++) {
   const card = document.createElement("img");
   card.setAttribute("src", placeholderSrc);
   card.setAttribute("alt", item.name);
-  card.setAttribute("width", width);
-  card.setAttribute("height", height);
+  // card.setAttribute("width", width);
+  // card.setAttribute("height", height);
   card.setAttribute("data-id", item.id);
   card.setAttribute("data-player", player1);
   player1Canvas.appendChild(card);
 }
 
-for (let i = formattedCards.length - 1; i >= 0; i--) {
-  const item = formattedCards[i];
+for (let k = formattedCards.length - 1; k >= 0; k--) {
+  const item = formattedCards[k];
   // create card instance
   const card = document.createElement("img");
   card.setAttribute("src", placeholderSrc);
   card.setAttribute("alt", item.name);
-  card.setAttribute("width", width);
-  card.setAttribute("height", height);
+  // card.setAttribute("width", width);
+  // card.setAttribute("height", height);
   card.setAttribute("data-id", item.id);
   card.setAttribute("data-player", player2);
   player2Canvas.appendChild(card);
 }
 
-function randomize(array) {
-  let temporaryArray = array.concat(array);
-
-  let finalArray = [];
-
-  let prev = {};
-
-  let count = 0;
-  while (count < temporaryArray.length) {
-    let index = Math.floor(Math.random() * temporaryArray.length);
-    let randomCard = temporaryArray[index];
-    if (!randomCard) {
-      continue;
-    }
-    if (randomCard.id === prev.id) {
-      // edge case
-      if (index >= temporaryArray.length - 1) {
-        index = index - 1;
-      } else if (index < temporaryArray.length - 1) {
-        index = index + 1;
-      }
-      randomCard = temporaryArray[index];
-      if (!randomCard) {
-        continue;
-      }
-      finalArray.push(randomCard);
-      temporaryArray.splice(index, 1);
-      prev = randomCard;
-    } else {
-      finalArray.push(randomCard);
-      temporaryArray.splice(index, 1);
-      prev = randomCard;
-    }
-  }
-  console.log({ finalArray });
-  return finalArray;
-}
-
 function initializePlayers(player) {
-  console.log("compare started");
   window.localStorage.setItem(
     "player1",
     JSON.stringify({ score: 0, clickCount: 0 })
@@ -160,14 +138,25 @@ function initializePlayers(player) {
 function init() {
   initializePlayers(player1);
   initializePlayers(player2);
+  soundControl();
 }
 
 function addEvent(img) {
   img.addEventListener("click", store);
 }
 
+let clickedCards = {
+  first: null,
+  second: null,
+};
+
 function store(event) {
   const dataset = event.target.dataset;
+  if (!clickedCards.first) {
+    clickedCards.first = event.target;
+  } else {
+    clickedCards.second = event.target;
+  }
   if (dataset.player === player1) {
     let player1Stats = window.localStorage.getItem("player1");
     player1Stats = JSON.parse(player1Stats);
@@ -181,51 +170,64 @@ function store(event) {
       if (!player1Stats.prevId) {
         player1Stats.prevId = event.target.dataset.id;
       } else {
-        const img1 = document.querySelector(
-          `#player1-canvas [data-id='${player1Stats.prevId}']`
-        );
-        const img2 = document.querySelector(
-          `#player1-canvas [data-id='${player1Stats.currentId}']`
-        );
+        const img1 = clickedCards.first;
+        const img2 = clickedCards.second;
 
         if (player1Stats.prevId == event.target.dataset.id) {
           player1Stats.score = Number(player1Stats.score) + 1;
           player1Score.textContent = player1Stats.score;
           setTimeout(() => {
             alert("Correct Choice");
+          }, 500);
+
+          setTimeout(() => {
             img1.removeEventListener("click", store);
             img1.style.visibility = "hidden";
-          }, 500);
-          setTimeout(() => {
+            img1.style.opacity = 0;
+
             img2.removeEventListener("click", store);
             img2.style.visibility = "hidden";
-            console.log("test 11");
+            img2.style.opacity = 0;
+            clickedCards = {};
+            player1Canvas.classList.add("remove-canvas");
+            player2Canvas.classList.remove("remove-canvas");
           }, 1000);
         } else {
           setTimeout(() => {
-            img1.setAttribute("src", placeholderSrc);
-            alert("Incorrect choice");
+            alert("Incorrect Choice");
           }, 500);
+
           setTimeout(() => {
-            console.log({ img2 });
-            img2.setAttribute("src", placeholderSrc);
-            console.log("test 11");
+            img1.src = placeholderSrc;
+
+            img2.src = placeholderSrc;
+            clickedCards = {};
+            player1Canvas.classList.add("remove-canvas");
+            player2Canvas.classList.remove("remove-canvas");
           }, 1000);
         }
       }
       player2Stats.prevId = "";
       player2Stats.currentId = "";
       player2Stats.clickCount = 0;
+
       window.localStorage.setItem("player1", JSON.stringify(player1Stats));
       window.localStorage.setItem("player2", JSON.stringify(player2Stats));
     } else if (Number(player1Stats.clickCount) >= 2) {
       alert("It is player two's turn");
+      clickedCards = {};
+
       player1Stats.clickCount = 0;
       player1Stats.prevId = 0;
       return;
     }
 
-    console.log({ player1Stats });
+    if (Number(player1Stats.score) === 8) {
+      setTimeout(() => {
+        alert("player 2 wins!");
+        confirm("Do you want to play again?") ? window.location.reload() : null;
+      }, 1500);
+    }
   } else if (dataset.player === player2) {
     let player2Stats = window.localStorage.getItem("player2");
     player2Stats = JSON.parse(player2Stats);
@@ -238,37 +240,38 @@ function store(event) {
       if (!player2Stats.prevId) {
         player2Stats.prevId = event.target.dataset.id;
       } else {
-        const img1 = document.querySelector(
-          `#player2-canvas [data-id='${player2Stats.prevId}']`
-        );
-        const img2 = document.querySelector(
-          `#player2-canvas [data-id='${player2Stats.currentId}']`
-        );
+        const img1 = clickedCards.first;
+        const img2 = clickedCards.second;
 
         if (player2Stats.prevId == event.target.dataset.id) {
           player2Stats.score = Number(player2Stats.score) + 1;
           player2Score.textContent = player2Stats.score;
           setTimeout(() => {
             alert("Correct Choice");
+          }, 500);
+
+          setTimeout(() => {
             img1.removeEventListener("click", store);
             img1.style.visibility = "hidden";
-          }, 500);
-          setTimeout(() => {
+            img1.style.opacity = 0;
+
             img2.removeEventListener("click", store);
             img2.style.visibility = "hidden";
-            console.log("test 22");
+            img2.style.opacity = 0;
+            clickedCards = {};
+            player2Canvas.classList.add("remove-canvas");
+            player1Canvas.classList.remove("remove-canvas");
           }, 1000);
         } else {
-          console.log("entered");
           setTimeout(() => {
-            img1.setAttribute("src", placeholderSrc);
-            alert("Incorrect choice");
+            alert("Incorrect Choice");
           }, 500);
           setTimeout(() => {
-            console.log({ img2 });
-
-            img2.setAttribute("src", placeholderSrc);
-            console.log("test 22");
+            img1.src = placeholderSrc;
+            img2.src = placeholderSrc;
+            clickedCards = {};
+            player2Canvas.classList.add("remove-canvas");
+            player1Canvas.classList.remove("remove-canvas");
           }, 1000);
         }
       }
@@ -279,11 +282,29 @@ function store(event) {
       window.localStorage.setItem("player2", JSON.stringify(player2Stats));
     } else if (Number(player2Stats.clickCount) >= 2) {
       alert("It is player one's turn");
+      clickedCards = {};
+
       player2Stats.clickCount = 0;
       player2Stats.prevId = 0;
       return;
     }
 
-    console.log({ player2Stats });
+    if (Number(player2Stats.score) === 8) {
+      setTimeout(() => {
+        alert("player 2 wins!");
+        confirm("Do you want to play again?") ? window.location.reload() : null;
+      }, 1500);
+    }
+  }
+}
+
+function soundControl() {
+  const img = Array.from(gameSoundControl.children)[0];
+  if (gameSound.duration > 0 && gameSound.paused) {
+    gameSound.play();
+    img.src = "./assets/pause-circle-svgrepo-com.svg";
+  } else {
+    gameSound.pause();
+    img.src = "./assets/play-circle-svgrepo-com.svg";
   }
 }
